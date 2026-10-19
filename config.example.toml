@@ -1,0 +1,85 @@
+# ringbridge config. Copy to ~/.config/ringbridge/config.toml and `chmod 600` it:
+# it holds passwords and tokens, so keep it out of git.
+
+[schedule]
+# Only alert inside these windows (local time, "HH:MM-HH:MM"). Overnight like "22:00-06:00" works
+# and belongs to the day it starts on. Empty = always active while ringbridge runs.
+windows = []
+# windows = ["18:00-02:00"]
+days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+
+[alert]
+# Channels are tried in order. If one FAILS (can't deliver), the next one is used,
+# e.g. channels = ["sip", "ntfy"] falls back to a push notification if the call fails.
+channels = ["sip"]
+# Also move to the next channel when a channel delivered but you never reacted
+escalate_unacknowledged = false
+# Using the computer's keyboard/mouse after an alert starts counts as "I'm on it" (GNOME only).
+# Off by default: any mouse movement (or a jittery mouse overnight) would cancel the call.
+ack_on_laptop_activity = false
+# Minimum gap between two alerts, so a busy chat doesn't page you over and over
+cooldown_seconds = 120
+# Put the sender (notification title) in the alert. The message body is never sent.
+include_sender = true
+
+# ---------------------------------------------------------------- sources (what triggers an alert)
+
+[[sources]]
+type = "desktop"          # desktop notifications via D-Bus (Teams PWA / web / teams-for-linux)
+name = "teams"            # alert text: "New Teams message from <sender>" (override with `label`)
+preset = "teams"
+# match = ["extra regex"]  # added to the preset; matched on app name, title, body, desktop entry
+# exclude = ["regex"]      # ignore notifications matching this (e.g. a noisy channel name)
+
+[[sources]]
+type = "desktop"
+name = "slack"
+preset = "slack"
+enabled = false
+
+[[sources]]
+type = "webhook"          # POST http://127.0.0.1:8787/alert with "Authorization: Bearer <token>"
+name = "webhook"
+enabled = false
+listen = "127.0.0.1:8787"
+path = "/alert"
+token = "change-me-to-a-long-random-string"   # python3 -c "import secrets;print(secrets.token_urlsafe(24))"
+
+# ---------------------------------------------------------------- channels (how your phone is alerted)
+
+[channels.sip]
+# Real incoming call in a SIP softphone app (Linphone). Free with two sip.linphone.org accounts.
+domain = "sip.linphone.org"
+transport = "tls"
+# Audio encryption: "srtp-mand" (required by Linphone for iOS), "srtp" (optional), "dtls_srtp", "none"
+media_encryption = "srtp-mand"
+username = "laptop-account"       # caller account (used by this computer)
+password = ""
+call_to = "phone-account"         # receiver account (logged in on the phone)
+ring_seconds = 60                 # ring this long per call (the phone app may stop sooner) ...
+pause_seconds = 5                 # ... wait this long ...
+max_calls = 10                    # ... and call again up to this many times
+
+[channels.ntfy]
+# Free push notification (https://ntfy.sh app). Anyone who knows the topic can read it: keep it random.
+server = "https://ntfy.sh"
+topic = ""                        # python3 -c "import secrets;print('rb-'+secrets.token_hex(8))"
+title = "ringbridge alert"
+priority = 5
+repeat_seconds = 30
+max_alerts = 10
+
+[channels.pushover]
+# Emergency alert with long sounds; rings through iPhone silent mode (Critical Alerts). $5 one-time.
+user_key = ""
+app_token = ""
+title = "ringbridge alert"
+sound = "alien"                   # long sounds: alien, persistent, echo, updown, climb
+retry_seconds = 30
+expire_seconds = 600
+
+[channels.callmebot]
+# Telegram voice call via the free CallMeBot service (authorize it first, see README).
+username = "@your_telegram_username"
+lang = "en-US-Standard-B"
+repeat = 2

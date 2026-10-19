@@ -1,0 +1,11 @@
+# Real config holds passwords/tokens: only config.example.toml belongs in git
+config.toml
+*.local.toml
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/

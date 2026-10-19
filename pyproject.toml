@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ringbridge"
+dynamic = ["version"]
+description = "Turn incoming messages (Teams, Slack, webhooks) into a phone call or loud alert. No admin rights needed."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Pasindu Piyathilaka" }]
+requires-python = ">=3.11"
+# Desktop notification source needs the distro packages python3-dbus and python3-gi
+# (they don't install cleanly from PyPI); everything else is standard library only.
+dependencies = []
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Communications :: Telephony",
+    "Topic :: System :: Monitoring",
+]
+keywords = ["on-call", "alerting", "teams", "sip", "linphone", "ntfy", "pushover", "notifications"]
+
+[project.scripts]
+ringbridge = "ringbridge.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "ringbridge.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["ringbridge*"]
