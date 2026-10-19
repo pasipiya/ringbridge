@@ -1,0 +1,13 @@
+# Installed by install.sh with @REPO@ replaced by the repository path.
+[Unit]
+Description=ringbridge: phone call / alert on incoming messages
+After=graphical-session.target
+
+[Service]
+Environment=PYTHONPATH=@REPO@
+ExecStart=/usr/bin/python3 -m ringbridge run
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
